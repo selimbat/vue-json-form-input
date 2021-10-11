@@ -1,24 +1,24 @@
 <template>
   <div>
-    <label v-if="propName" :for="`${$options._scopeId}:${propName}`">
+    <label v-if="propName" :for="`${id}:${propName}`">
       {{ labels[propName] != null ? labels[propName] : propName }}
     </label>
     <input
-      :id="`${$options._scopeId}:${propName}`"
+      :id="`${id}:${propName}`"
       v-if="isScalar(value)"
       :type="inputType(value)"
       :placeholder="value"
     />
     <JsonFormInput
       class="pad"
-      :id="`${$options._scopeId}:${propName}`"
+      :id="`${id}:${propName}`"
       v-else-if="isObject(value)"
       :template="value"
       :labels="labels"
     ></JsonFormInput>
-    <ul v-else :id="`${$options._scopeId}:${propName}`">
       <li v-for="(item, index) in value" :key="index">
         <JsonFormNode :value="item" :labels="labels"></JsonFormNode>
+    <ul v-else :id="`${id}:${propName}`">
       </li>
     </ul>
   </div>
@@ -26,6 +26,8 @@
 
 <script>
   import JsonFormInput from "@/components/JsonFormInput";
+
+  let uid = 0;
 
   export default {
     name: "JsonFormNode",
@@ -42,6 +44,14 @@
       labels: {
         type: Object,
       },
+    },
+    data() {
+      return {
+        id: uid,
+      };
+    },
+    beforeCreate() {
+      uid++;
     },
     methods: {
       inputType(value) {
