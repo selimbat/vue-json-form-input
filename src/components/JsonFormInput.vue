@@ -6,6 +6,7 @@
       :propName="propName"
       :value="value"
       :labels="labels"
+      @value-changed="(newValue) => registerChange(propName, newValue)"
     ></JsonFormNode>
   </div>
 </template>
@@ -25,6 +26,20 @@
       },
       labels: {
         type: Object,
+      },
+    },
+    data() {
+      return {
+        model: {},
+      };
+    },
+    methods: {
+      registerChange(propName, newValue) {
+        this.model[propName] = newValue;
+        this.bubble();
+      },
+      bubble() {
+        this.$emit("value-changed", this.model);
       },
     },
   };

@@ -8,6 +8,8 @@
       v-if="isScalar(value)"
       :type="inputType(value)"
       :placeholder="value"
+      v-model="model"
+      @change="bubble()"
     />
     <JsonFormInput
       class="pad"
@@ -15,10 +17,17 @@
       v-else-if="isObject(value)"
       :template="value"
       :labels="labels"
+      @value-changed="(newValue) => registerChange(propName, newValue)"
     ></JsonFormInput>
-      <li v-for="(item, index) in value" :key="index">
-        <JsonFormNode :value="item" :labels="labels"></JsonFormNode>
     <ul v-else :id="`${id}:${propName}`">
+      <li v-for="index in arrayItemsLength" :key="index">
+        <JsonFormNode
+          :value="value[0]"
+          :labels="labels"
+          @value-changed="
+            (newValue) => registerArrayItemChange(index - 1, newValue)
+          "
+        ></JsonFormNode>
       </li>
     </ul>
   </div>
@@ -47,6 +56,8 @@
     },
     data() {
       return {
+        model: undefined,
+        arrayItemsLength: 1,
         id: uid,
       };
     },
@@ -54,6 +65,26 @@
       uid++;
     },
     methods: {
+      registerArrayItemChange(index, newValue) {
+        if (!this.model) {
+          this.model = [];
+        }
+        this.model[index] = newValue;
+        this.bubble();
+      },
+      registerChange(propName, newValue) {
+        if (!this.model) {
+          this.model = {};
+        }
+        if (propName) {
+          this.model[propName] = newValue;
+        }
+        this.model = newValue;
+        this.bubble();
+      },
+      bubble() {
+        this.$emit("value-changed", this.model);
+      },
       inputType(value) {
         if (this.isScalar(value)) {
           return this.isString(value) ? "text" : "number";
